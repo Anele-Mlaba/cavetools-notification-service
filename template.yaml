@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cavetools-notification-service
+
+  Sample SAM Template for cavetools-notification-service
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+
+Parameters:
+  ZohoClientId:
+    Type: String
+    NoEcho: true
+    Description: Zoho API console client ID used for the OAuth2 refresh token flow.
+  ZohoClientSecret:
+    Type: String
+    NoEcho: true
+    Description: Zoho API console client secret.
+  ZohoRefreshToken:
+    Type: String
+    NoEcho: true
+    Description: Long-lived Zoho OAuth2 refresh token used to obtain access tokens.
+  ZohoAccountId:
+    Type: String
+    NoEcho: true
+    Description: Zoho Mail account ID that owns the sending mailbox.
+  EmailFromAddress:
+    Type: String
+    Default: no-reply@cavetools.co.za
+    Description: Shared mailbox that all notification emails are sent from.
+  AppConfigJson:
+    Type: String
+    Description: JSON map of appName -> { displayName, ownerEmail, ... } used to resolve recipients.
+    Default: >-
+      {"cavetools":{"displayName":"CaveTools","ownerEmail":"hello@cavetools.co.za"},"topselect":{"displayName":"TopSelect","ownerEmail":"bookings@topselect.co.za"},"wellmed":{"displayName":"WellMed","ownerEmail":"admin@wellmed.co.za"},"madlite":{"displayName":"Madlite","ownerEmail":"hello@madlite.co.za"},"lifestyleclub":{"displayName":"LifestyleClub","ownerEmail":"Info@lifestyleclub.co.za"}}
+
+Resources:
+  NotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: notification-service/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Timeout: 10
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          ZOHO_CLIENT_ID: !Ref ZohoClientId
+          ZOHO_CLIENT_SECRET: !Ref ZohoClientSecret
+          ZOHO_REFRESH_TOKEN: !Ref ZohoRefreshToken
+          ZOHO_ACCOUNT_ID: !Ref ZohoAccountId
+          EMAIL_FROM_ADDRESS: !Ref EmailFromAddress
+          APP_CONFIG_JSON: !Ref AppConfigJson
+      Events:
+        SendNotification:
+          Type: Api
+          Properties:
+            Path: /notifications/send
+            Method: post
+        PreflightNotification:
+          Type: Api
+          Properties:
+            Path: /notifications/send
+            Method: options
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  NotificationApi:
+    Description: API Gateway endpoint URL for Prod stage for the notification service
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/notifications/send/"
+  NotificationFunction:
+    Description: Notification Service Lambda Function ARN
+    Value: !GetAtt NotificationFunction.Arn

@@ -1,0 +1,23 @@
+{
+  "body": "{\"appName\":\"cavetools\",\"notificationType\":\"new_lead\",\"recipientType\":\"owner\",\"data\":{\"name\":\"Anele Madonda\",\"email\":\"you@example.com\",\"phone\":\"071 234 5678\",\"businessType\":\"Restaurant\",\"message\":\"I need a website\"}}",
+  "resource": "/notifications/send",
+  "path": "/notifications/send",
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "resourcePath": "/notifications/send",
+    "httpMethod": "POST",
+    "path": "/Prod/notifications/send",
+    "stage": "Prod",
+    "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+    "identity": {
+      "sourceIp": "127.0.0.1"
+    }
+  }
+}
