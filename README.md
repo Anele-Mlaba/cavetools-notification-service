@@ -9,6 +9,29 @@ This project contains source code and supporting files for a serverless applicat
 
 The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
 
+## Notification types
+
+All requests to `/notifications/send` share the same envelope:
+
+```json
+{
+  "appName": "cavetools",
+  "notificationType": "new_lead | booking_confirmation",
+  "recipientType": "owner | customer",
+  "data": { ... }
+}
+```
+
+- **`new_lead`** (`recipientType: "owner"`) - notifies the app owner (configured in `APP_CONFIG_JSON`) of a new enquiry. `data`: `name`, `email`, `phone`, `businessType`, `message`.
+- **`booking_confirmation`** (`recipientType: "customer"`) - sends a booking confirmation with a Google/Outlook/Apple-compatible calendar invite (`.ics`) directly to a customer. The email is technically sent from the shared `EMAIL_FROM_ADDRESS` mailbox, but its header banner and the `ORGANIZER` field on the invite display the `companyName` from the request, so recipients see which company the booking is with.
+  - `data.email` (required) - the customer's email address, used as the recipient since customers aren't pre-registered in `APP_CONFIG_JSON`.
+  - `data.companyName` (required) - company name shown in the email.
+  - `data.message` (required) - confirmation message body.
+  - `data.name` (optional) - customer's name, used for the greeting and as the invite attendee display name.
+  - `data.event` (required) - `title` and `startTime`/`endTime` (ISO 8601 with a UTC offset, e.g. `2026-08-10T10:00:00+02:00`) are required; `location` and `description` are optional.
+
+  See `notification-service/events/booking-confirmation.json` for a full sample event.
+
 If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
 The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
 

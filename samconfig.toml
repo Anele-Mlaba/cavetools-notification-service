@@ -35,7 +35,7 @@ resolve_s3 = true
 s3_prefix = "cavetools-notification-service"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "EmailFromAddress=\"no-reply@cavetools.co.za\" AppConfigJson=\"{\\\"cavetools\\\":{\\\"displayName\\\":\\\"CaveTools\\\",\\\"ownerEmail\\\":\\\"hello@cavetools.co.za\\\"},\\\"topselect\\\":{\\\"displayName\\\":\\\"TopSelect\\\",\\\"ownerEmail\\\":\\\"bookings@topselect.co.za\\\"},\\\"wellmed\\\":{\\\"displayName\\\":\\\"WellMed\\\",\\\"ownerEmail\\\":\\\"admin@wellmed.co.za\\\"},\\\"madlite\\\":{\\\"displayName\\\":\\\"Madlite\\\",\\\"ownerEmail\\\":\\\"hello@madlite.co.za\\\"},\\\"lifestyleclub\\\":{\\\"displayName\\\":\\\"LifestyleClub\\\",\\\"ownerEmail\\\":\\\"Info@lifestyleclub.co.za\\\"}}\""
+parameter_overrides = "EmailFromAddress=\"no-reply@cavetools.co.za\" AppConfigJson=\"{\\\"cavetools\\\":{\\\"displayName\\\":\\\"CaveTools\\\",\\\"ownerEmail\\\":\\\"hello@cavetools.co.za\\\"},\\\"sttps\\\":{\\\"displayName\\\":\\\"STTPS\\\",\\\"ownerEmail\\\":\\\"help@sttps.co.za\\\"}}\""
 image_repositories = []
 
 [prod.global.parameters]

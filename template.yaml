@@ -39,7 +39,7 @@ Parameters:
     Type: String
     Description: JSON map of appName -> { displayName, ownerEmail, ... } used to resolve recipients.
     Default: >-
-      {"cavetools":{"displayName":"CaveTools","ownerEmail":"hello@cavetools.co.za"},"topselect":{"displayName":"TopSelect","ownerEmail":"bookings@topselect.co.za"},"wellmed":{"displayName":"WellMed","ownerEmail":"admin@wellmed.co.za"},"madlite":{"displayName":"Madlite","ownerEmail":"hello@madlite.co.za"},"lifestyleclub":{"displayName":"LifestyleClub","ownerEmail":"Info@lifestyleclub.co.za"}}
+      {"cavetools":{"displayName":"CaveTools","ownerEmail":"hello@cavetools.co.za"},"sttps":{"displayName":"STTPS","ownerEmail":"help@sttps.co.za"}}
 
 Resources:
   NotificationFunction:
