@@ -1,0 +1,23 @@
+{
+  "body": "{\"appName\":\"cavetools\",\"notificationType\":\"booking_reminder\",\"recipientType\":\"customer\",\"data\":{\"email\":\"customer@example.com\",\"name\":\"Jane Customer\",\"companyName\":\"CaveTools\",\"message\":\"See you soon! Reply to this email if you need to reschedule.\",\"event\":{\"title\":\"Consultation Call\",\"description\":\"Discuss website requirements\",\"location\":\"Zoom\",\"startTime\":\"2026-08-10T10:00:00+02:00\",\"endTime\":\"2026-08-10T10:30:00+02:00\"}}}",
+  "resource": "/notifications/send",
+  "path": "/notifications/send",
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "resourcePath": "/notifications/send",
+    "httpMethod": "POST",
+    "path": "/Prod/notifications/send",
+    "stage": "Prod",
+    "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+    "identity": {
+      "sourceIp": "127.0.0.1"
+    }
+  }
+}

@@ -29,7 +29,7 @@ ALLOWED_ORIGINS = [
     "https://cavetools.co.za",
     "http://lifestyleclub.co.za",
     "https://sttps.co.za",
-    "https://d248irxbraom5z.cloudfront.net/pages/contact.html",
+    "https://d248irxbraom5z.cloudfront.net",
     "https://wellmed.org.za",
 ]
 
@@ -284,8 +284,9 @@ def format_event_time_range(event):
     return f"{date_part}, {time_part} ({offset_display})"
 
 
-def build_booking_confirmation_email(company_name, data):
-    """Build the subject, HTML body, and plain-text body for a booking_confirmation notification."""
+def _prepare_booking_event_fields(data):
+    """Extract and sanitize the fields shared by booking_confirmation and
+    booking_reminder emails (event details, customer name, message)."""
     event = data["event"]
     name_raw = str(data.get("name") or "there")
     message_raw = str(data.get("message", ""))
@@ -295,14 +296,11 @@ def build_booking_confirmation_email(company_name, data):
     time_range_raw = format_event_time_range(event)
 
     name = sanitize_html(name_raw)
-    company_name_safe = sanitize_html(company_name)
     message_html = sanitize_html(message_raw).replace("\n", "<br>")
     title = sanitize_html(title_raw)
     location = sanitize_html(location_raw)
     description_html = sanitize_html(description_raw).replace("\n", "<br>")
     time_range = sanitize_html(time_range_raw)
-
-    subject = f"Booking confirmed: {title_raw}"
 
     optional_rows = ""
     if location_raw:
@@ -317,6 +315,33 @@ def build_booking_confirmation_email(company_name, data):
                   <td style="padding:10px 0; font-size:13px; color:#6b7280; vertical-align:top;">Details</td>
                   <td style="padding:10px 0; font-size:14px; color:#111827; vertical-align:top;">{description_html}</td>
                 </tr>"""
+
+    return {
+        "name_raw": name_raw,
+        "message_raw": message_raw,
+        "title_raw": title_raw,
+        "location_raw": location_raw,
+        "description_raw": description_raw,
+        "time_range_raw": time_range_raw,
+        "name": name,
+        "message_html": message_html,
+        "title": title,
+        "time_range": time_range,
+        "optional_rows": optional_rows,
+    }
+
+
+def build_booking_confirmation_email(company_name, data):
+    """Build the subject, HTML body, and plain-text body for a booking_confirmation notification."""
+    f = _prepare_booking_event_fields(data)
+    name_raw, message_raw, title_raw = f["name_raw"], f["message_raw"], f["title_raw"]
+    location_raw, description_raw, time_range_raw = f["location_raw"], f["description_raw"], f["time_range_raw"]
+    name, message_html, title, time_range = f["name"], f["message_html"], f["title"], f["time_range"]
+    optional_rows = f["optional_rows"]
+
+    company_name_safe = sanitize_html(company_name)
+
+    subject = f"Booking confirmed: {title_raw}"
 
     html_body = f"""<!DOCTYPE html>
 <html lang="en">
@@ -383,9 +408,95 @@ def build_booking_confirmation_email(company_name, data):
     return subject, html_body, text_body
 
 
+def build_booking_reminder_email(company_name, data):
+    """Build the subject, HTML body, and plain-text body for a booking_reminder notification.
+
+    Shares the same required `data`/`event` fields and the same calendar-invite
+    handling as booking_confirmation (see `_prepare_booking_event_fields` and
+    the `notification_type in ("booking_confirmation", "booking_reminder")`
+    checks in `build_email_template`/`lambda_handler`), but uses reminder
+    wording instead of confirmation wording since the appointment was already
+    confirmed previously.
+    """
+    f = _prepare_booking_event_fields(data)
+    name_raw, message_raw, title_raw = f["name_raw"], f["message_raw"], f["title_raw"]
+    location_raw, description_raw, time_range_raw = f["location_raw"], f["description_raw"], f["time_range_raw"]
+    name, message_html, title, time_range = f["name"], f["message_html"], f["title"], f["time_range"]
+    optional_rows = f["optional_rows"]
+
+    company_name_safe = sanitize_html(company_name)
+
+    subject = f"Reminder: your {company_name} appointment is coming up"
+
+    html_body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{sanitize_html(subject)}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f5f7; font-family:'Segoe UI', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f7; padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width:600px;">
+          <tr>
+            <td style="background-color:#111827; padding:24px 32px;">
+              <span style="color:#ffffff; font-size:18px; font-weight:600; letter-spacing:0.3px;">{company_name_safe}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 16px 0; font-size:12px; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px;">Sent on behalf of {company_name_safe}</p>
+              <h1 style="margin:0 0 8px 0; font-size:20px; color:#111827; font-family:'Segoe UI', Arial, sans-serif;">Upcoming Appointment Reminder</h1>
+              <p style="margin:0 0 24px 0; font-size:14px; color:#6b7280; line-height:1.5;">Hi {name}, this is a friendly reminder about your upcoming appointment with {company_name_safe}. A calendar invite is attached to this email.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                <tr>
+                  <td style="padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; width:130px; vertical-align:top;">Event</td>
+                  <td style="padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; vertical-align:top;">{title}</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; vertical-align:top;">When</td>
+                  <td style="padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; vertical-align:top;">{time_range}</td>
+                </tr>{optional_rows}
+              </table>
+              <div style="margin-top:20px;">
+                <p style="margin:0 0 6px 0; font-size:13px; color:#6b7280;">Message</p>
+                <div style="background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; padding:16px; font-size:14px; color:#111827; line-height:1.5;">{message_html}</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f9fafb; padding:16px 32px; border-top:1px solid #e5e7eb;">
+              <p style="margin:0; font-size:12px; color:#9ca3af; line-height:1.5;">This is an automated appointment reminder sent on behalf of {company_name_safe}. Please do not reply to this email.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    text_body = (
+        f"Appointment Reminder - {company_name}\n\n"
+        f"Hi {name_raw}, this is a friendly reminder about your upcoming appointment with {company_name}. A calendar invite is attached.\n\n"
+        f"Event: {title_raw}\n"
+        f"When: {time_range_raw}\n"
+        + (f"Location: {location_raw}\n" if location_raw else "")
+        + (f"Details: {description_raw}\n" if description_raw else "")
+        + f"\nMessage:\n{message_raw}\n\n"
+        "---\n"
+        f"This is an automated appointment reminder sent on behalf of {company_name}."
+    )
+
+    return subject, html_body, text_body
+
+
 TEMPLATE_BUILDERS = {
     "new_lead": build_new_lead_email,
     "booking_confirmation": build_booking_confirmation_email,
+    "booking_reminder": build_booking_reminder_email,
 }
 
 
@@ -396,7 +507,7 @@ def build_email_template(notification_type, app_display_name, data):
 
     if notification_type == "new_lead":
         validate_new_lead_data(data)
-    elif notification_type == "booking_confirmation":
+    elif notification_type in ("booking_confirmation", "booking_reminder"):
         validate_booking_confirmation_data(data)
         app_display_name = data["companyName"]
 
@@ -671,7 +782,7 @@ def lambda_handler(event, context):
         access_token = get_zoho_access_token()
 
         attachments = None
-        if notification_type == "booking_confirmation":
+        if notification_type in ("booking_confirmation", "booking_reminder"):
             invite_bytes = build_calendar_invite(
                 data["companyName"], from_address, recipient_email,
                 data.get("name") or recipient_email, data["event"],

@@ -16,7 +16,7 @@ All requests to `/notifications/send` share the same envelope:
 ```json
 {
   "appName": "cavetools",
-  "notificationType": "new_lead | booking_confirmation",
+  "notificationType": "new_lead | booking_confirmation | booking_reminder",
   "recipientType": "owner | customer",
   "data": { ... }
 }
@@ -31,6 +31,10 @@ All requests to `/notifications/send` share the same envelope:
   - `data.event` (required) - `title` and `startTime`/`endTime` (ISO 8601 with a UTC offset, e.g. `2026-08-10T10:00:00+02:00`) are required; `location` and `description` are optional.
 
   See `notification-service/events/booking-confirmation.json` for a full sample event.
+
+- **`booking_reminder`** (`recipientType: "customer"`) - sends a pre-appointment reminder, with the same calendar invite (`.ics`) behavior as `booking_confirmation`, to a customer whose booking was already confirmed. Accepts the exact same `data` fields as `booking_confirmation` (`email`, `companyName`, `message`, optional `name`, and `event`), just with reminder-appropriate subject/body wording instead of confirmation wording.
+
+  See `notification-service/events/booking-reminder.json` for a full sample event.
 
 If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
 The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
