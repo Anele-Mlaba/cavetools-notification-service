@@ -39,7 +39,7 @@ Parameters:
     Type: String
     Description: JSON map of appName -> { displayName, ownerEmail, ... } used to resolve recipients.
     Default: >-
-      {"cavetools":{"displayName":"CaveTools","ownerEmail":"hello@cavetools.co.za"},"sttps":{"displayName":"STTPS","ownerEmail":"help@sttps.co.za"},"wellmed":{"displayName":"WellMed","ownerEmail":"admin@wellmed.co.za"},"glamourglow":{"displayName":"Xoxo Glamour Glow","ownerEmail":"xoxoglamourglow@gmail.com"},"beauty-bar-clinic":{"displayName":"Classic Touch Beauty Bar Clinic","ownerEmail":"anele.madonda@cavetools.co.za"}}
+      {"cavetools":{"displayName":"CaveTools","ownerEmail":"hello@cavetools.co.za"},"sttps":{"displayName":"STTPS","ownerEmail":"help@sttps.co.za"},"wellmed":{"displayName":"WellMed","ownerEmail":"admin@wellmed.co.za"},"glamourglow":{"displayName":"Xoxo Glamour Glow","ownerEmail":"xoxoglamourglow@gmail.com"},"beauty-bar-clinic":{"displayName":"Classic Touch Beauty Bar Clinic","ownerEmail":"ndlovupeaceful@gmail.com"}}
 
 Resources:
   NotificationFunction:
